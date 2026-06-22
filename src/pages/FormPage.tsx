@@ -296,7 +296,31 @@ function FieldInput({ field, value, error, onChange }: FieldInputProps) {
               type="file"
               className="sr-only"
               accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.doc,.docx,.xls,.xlsx,.txt"
-              onChange={(e) => onChange(field.id, e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                const f = e.target.files?.[0] ?? null;
+                if (f) {
+                  const ALLOWED_TYPES = new Set([
+                    "image/jpeg", "image/png", "image/webp", "image/gif",
+                    "application/pdf",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/vnd.ms-excel",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "text/plain",
+                  ]);
+                  if (!ALLOWED_TYPES.has(f.type)) {
+                    alert("File type not allowed.");
+                    e.target.value = "";
+                    return;
+                  }
+                  if (f.size > 10 * 1024 * 1024) {
+                    alert("File exceeds the 10 MB limit.");
+                    e.target.value = "";
+                    return;
+                  }
+                }
+                onChange(field.id, f);
+              }}
             />
           </label>
           {file && (
@@ -436,14 +460,33 @@ export function FormPage() {
   useEffect(() => {
     if (!slug) return;
 
+    // Validate slug before any API call — prevents path traversal and analytics abuse
+    if (!/^[a-z0-9_-]{1,100}$/i.test(slug)) {
+      setErrorMsg("This form is not available or the link is incorrect.");
+      setPageStatus("error");
+      return;
+    }
+
     (async () => {
       try {
         const res = await api.get(`/public/forms/${slug}`);
-        setForm(res.data.data);
+        const fetchedForm = res.data.data;
+
+        // Enforce endDate from form settings client-side
+        if (fetchedForm.settings?.endDate) {
+          const end = new Date(fetchedForm.settings.endDate);
+          if (end < new Date()) {
+            setErrorMsg("This form has closed and is no longer accepting responses.");
+            setPageStatus("error");
+            return;
+          }
+        }
+
+        setForm(fetchedForm);
         setPageStatus("active");
-      } catch (err: unknown) {
-        const e = err as { response?: { data?: { error?: string } } };
-        setErrorMsg(e.response?.data?.error ?? "This form is not available.");
+      } catch {
+        // Generic message — never reveal whether the slug exists or not
+        setErrorMsg("This form is not available or the link is incorrect.");
         setPageStatus("error");
         return;
       }
@@ -491,6 +534,25 @@ export function FormPage() {
 
       if (field.required && empty) {
         errors[field.id] = "This field is required";
+        continue;
+      }
+
+      if (!empty) {
+        if (field.type === "email" && typeof val === "string") {
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+            errors[field.id] = "Please enter a valid email address";
+          }
+        } else if (field.type === "phone" && typeof val === "string") {
+          if (!/^\+?[\d\s\-().]{7,20}$/.test(val)) {
+            errors[field.id] = "Please enter a valid phone number";
+          }
+        } else if (field.type === "short_text" && typeof val === "string") {
+          if (val.length > 500) errors[field.id] = "Response must be 500 characters or fewer";
+        } else if (field.type === "long_text" && typeof val === "string") {
+          if (val.length > 5000) errors[field.id] = "Response must be 5000 characters or fewer";
+        } else if (field.type === "file" && val instanceof File) {
+          if (val.size > 10 * 1024 * 1024) errors[field.id] = "File must be 10 MB or smaller";
+        }
       }
     }
 
@@ -512,6 +574,13 @@ export function FormPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form || !slug) return;
+
+    // Enforce allowMultipleSubmissions client-side
+    const SUBMIT_KEY = `submitted_${slug}`;
+    if (!form.settings.allowMultipleSubmissions && sessionStorage.getItem(SUBMIT_KEY)) {
+      setServerErrors(["You have already submitted this form."]);
+      return;
+    }
 
     setServerErrors([]);
     if (!validate()) return;
@@ -551,6 +620,7 @@ export function FormPage() {
         await api.post(`/public/forms/${slug}/submit`, body);
       }
 
+      sessionStorage.setItem(`submitted_${slug}`, "1");
       setPageStatus("submitted");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: unknown) {
