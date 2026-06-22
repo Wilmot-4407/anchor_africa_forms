@@ -22,6 +22,7 @@ export interface FormField {
   options?: string[];
   helpText?: string;
   placeholder?: string;
+  colSpan?: 1 | 2;
 }
 
 export interface FormSettings {
