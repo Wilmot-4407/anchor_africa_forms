@@ -22,8 +22,8 @@ function StarRating({
           onClick={() => onChange(star)}
           onMouseEnter={() => setHovered(star)}
           onMouseLeave={() => setHovered(0)}
-          className={`w-10 h-10 flex items-center justify-center text-3xl leading-none transition-transform hover:scale-110 focus:outline-none ${
-            star <= (hovered || value) ? "text-amber-400" : "text-gray-200"
+          className={`w-9 h-9 flex items-center justify-center text-2xl leading-none transition-transform hover:scale-110 focus:outline-none ${
+            star <= (hovered || value) ? "text-[#ba9d20]" : "text-gray-200"
           }`}
           aria-label={`${star} star`}
         >
@@ -53,13 +53,13 @@ function YesNoField({
           key={opt}
           type="button"
           onClick={() => onChange(value === opt ? "" : opt)}
-          className={`flex-1 py-3.5 rounded-xl border-2 font-semibold text-sm transition-all ${
+          className={`flex-1 py-3 rounded-lg border font-medium text-sm transition-all ${
             value === opt
-              ? "border-primary bg-primary text-white shadow-sm"
-              : "border-gray-200 text-gray-600 hover:border-primary/60 hover:text-primary bg-white"
+              ? "border-primary bg-primary text-white"
+              : "border-gray-200 text-gray-500 hover:border-primary/50 hover:text-primary bg-white"
           }`}
         >
-          {opt === "yes" ? "✓  Yes" : "✗  No"}
+          {opt === "yes" ? "Yes" : "No"}
         </button>
       ))}
     </div>
@@ -73,10 +73,11 @@ interface FieldInputProps {
   onChange: (fieldId: string, value: AnswerValue) => void;
 }
 
+// Flat, underline-style inputs — quieter than boxed borders, reads as more premium.
 const INPUT_BASE =
-  "w-full px-4 py-3 rounded-xl border-2 text-gray-800 placeholder:text-gray-400 focus:outline-none transition-colors text-sm bg-white";
+  "w-full bg-transparent border-0 border-b-2 px-0 py-2.5 text-[15px] text-gray-800 placeholder:text-gray-300 focus:outline-none transition-colors";
 const INPUT_NORMAL = "border-gray-200 focus:border-primary";
-const INPUT_ERROR = "border-red-400 focus:border-red-500 bg-red-50";
+const INPUT_ERROR = "border-red-400 focus:border-red-500";
 
 function FieldInput({ field, value, error, onChange }: FieldInputProps) {
   const str = typeof value === "string" ? value : "";
@@ -85,12 +86,12 @@ function FieldInput({ field, value, error, onChange }: FieldInputProps) {
   switch (field.type) {
     case "heading":
       return (
-        <div className="pt-2">
-          <h3 className="text-lg font-bold text-gray-800 leading-snug">
+        <div className="pt-1">
+          <h3 className="text-base font-semibold text-gray-900 leading-snug tracking-tight">
             {field.question}
           </h3>
           {field.helpText && (
-            <p className="text-sm text-gray-500 mt-1">{field.helpText}</p>
+            <p className="text-sm text-gray-400 mt-1">{field.helpText}</p>
           )}
         </div>
       );
@@ -101,23 +102,21 @@ function FieldInput({ field, value, error, onChange }: FieldInputProps) {
           value={str}
           onChange={(e) => onChange(field.id, e.target.value)}
           placeholder={field.placeholder || "Your answer…"}
-          rows={4}
+          rows={3}
           className={`${cls} resize-none`}
         />
       );
 
     case "multiple_choice":
       return (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {(field.options ?? []).map((opt) => {
             const selected = str === opt;
             return (
               <label
                 key={opt}
-                className={`flex items-center gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
-                  selected
-                    ? "border-primary bg-primary/5"
-                    : "border-gray-200 hover:border-primary/50 bg-white"
+                className={`flex items-center gap-3 py-2.5 px-3 -mx-3 rounded-lg cursor-pointer transition-colors ${
+                  selected ? "bg-primary/[0.06]" : "hover:bg-gray-50"
                 }`}
               >
                 <div
@@ -138,7 +137,7 @@ function FieldInput({ field, value, error, onChange }: FieldInputProps) {
                   className="sr-only"
                 />
                 <span
-                  className={`text-sm font-medium ${selected ? "text-primary" : "text-gray-700"}`}
+                  className={`text-sm ${selected ? "text-primary font-medium" : "text-gray-700"}`}
                 >
                   {opt}
                 </span>
@@ -151,16 +150,14 @@ function FieldInput({ field, value, error, onChange }: FieldInputProps) {
     case "checkboxes": {
       const selected = Array.isArray(value) ? value : [];
       return (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {(field.options ?? []).map((opt) => {
             const checked = selected.includes(opt);
             return (
               <label
                 key={opt}
-                className={`flex items-center gap-3 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
-                  checked
-                    ? "border-primary bg-primary/5"
-                    : "border-gray-200 hover:border-primary/50 bg-white"
+                className={`flex items-center gap-3 py-2.5 px-3 -mx-3 rounded-lg cursor-pointer transition-colors ${
+                  checked ? "bg-primary/[0.06]" : "hover:bg-gray-50"
                 }`}
               >
                 <div
@@ -198,7 +195,7 @@ function FieldInput({ field, value, error, onChange }: FieldInputProps) {
                   className="sr-only"
                 />
                 <span
-                  className={`text-sm font-medium ${checked ? "text-primary" : "text-gray-700"}`}
+                  className={`text-sm ${checked ? "text-primary font-medium" : "text-gray-700"}`}
                 >
                   {opt}
                 </span>
@@ -215,7 +212,7 @@ function FieldInput({ field, value, error, onChange }: FieldInputProps) {
           <select
             value={str}
             onChange={(e) => onChange(field.id, e.target.value)}
-            className={`${cls} appearance-none cursor-pointer pr-10`}
+            className={`${cls} appearance-none cursor-pointer pr-8`}
           >
             <option value="">Select an option…</option>
             {(field.options ?? []).map((opt) => (
@@ -225,7 +222,7 @@ function FieldInput({ field, value, error, onChange }: FieldInputProps) {
             ))}
           </select>
           <svg
-            className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+            className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -256,14 +253,14 @@ function FieldInput({ field, value, error, onChange }: FieldInputProps) {
       return (
         <div>
           <label
-            className={`flex flex-col items-center justify-center gap-2.5 p-7 rounded-xl border-2 border-dashed cursor-pointer transition-all ${
+            className={`flex flex-col items-center justify-center gap-2 p-6 rounded-lg border border-dashed cursor-pointer transition-all ${
               error
                 ? "border-red-300 bg-red-50"
-                : "border-gray-200 hover:border-primary/60 hover:bg-primary/5 bg-white"
+                : "border-gray-200 hover:border-primary/50 hover:bg-primary/[0.03] bg-gray-50/50"
             }`}
           >
             <svg
-              className="w-9 h-9 text-gray-300"
+              className="w-7 h-7 text-gray-300"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -402,42 +399,63 @@ function FieldInput({ field, value, error, onChange }: FieldInputProps) {
   }
 }
 
-// ─── Progress bar ─────────────────────────────────────────────────────────────
+// ─── Sticky progress rail (desktop) ───────────────────────────────────────────
+// Signature element: a single vertical line that genuinely tracks completion,
+// not a decorative step list — there's only one step (this form), so the line
+// itself is the indicator, with a status word underneath.
 
-function ProgressBar({
-  fields,
+function ProgressRail({
+  form,
   answers,
+  pct,
 }: {
-  fields: FormField[];
+  form: PublicForm;
   answers: Record<string, AnswerValue>;
+  pct: number;
 }) {
-  const required = fields.filter((f) => f.required && f.type !== "heading");
-  if (required.length === 0) return null;
+  return (
+    <div className="hidden lg:flex flex-col h-full sticky top-10">
+      <img src="/mobile logo.png" alt="Anchor Africa" className="h-9 object-contain mb-10" />
 
+      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#ba9d20] mb-3">
+        {form.category}
+      </span>
+      <h1 className="text-[28px] font-bold text-gray-900 leading-[1.15] tracking-tight mb-3">
+        {form.title}
+      </h1>
+      {form.description && (
+        <p className="text-sm text-gray-500 leading-relaxed mb-10">
+          {form.description}
+        </p>
+      )}
+
+      <div className="mt-auto flex items-center gap-4">
+        <div className="relative w-1 h-20 rounded-full bg-gray-100 overflow-hidden">
+          <div
+            className="absolute bottom-0 left-0 w-full bg-primary rounded-full transition-all duration-500"
+            style={{ height: `${pct}%` }}
+          />
+        </div>
+        <div>
+          <p className="text-2xl font-bold text-gray-900 leading-none">{pct}%</p>
+          <p className="text-xs text-gray-400 mt-1">
+            {pct === 100 ? "Ready to submit" : "complete"}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function mobileProgressPct(form: PublicForm, answers: Record<string, AnswerValue>) {
+  const required = form.fields.filter((f) => f.required && f.type !== "heading");
+  if (required.length === 0) return 100;
   const answered = required.filter((f) => {
     const v = answers[f.id];
     if (Array.isArray(v)) return v.length > 0;
     return v !== undefined && v !== null && v !== "";
   }).length;
-
-  const pct = Math.round((answered / required.length) * 100);
-
-  return (
-    <div className="px-8 py-3 bg-gray-50 border-b border-gray-100">
-      <div className="flex justify-between items-center mb-1.5">
-        <span className="text-xs text-gray-400 font-medium">
-          {answered} of {required.length} required fields
-        </span>
-        <span className="text-xs font-bold text-primary">{pct}%</span>
-      </div>
-      <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-primary rounded-full transition-all duration-500"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
-  );
+  return Math.round((answered / required.length) * 100);
 }
 
 // ─── Main FormPage ────────────────────────────────────────────────────────────
@@ -642,9 +660,9 @@ export function FormPage() {
   // ── Render: loading ───────────────────────────────────────────────────────────
   if (pageStatus === "loading") {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#fbfbfa] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 rounded-full border-[3px] border-primary border-t-transparent animate-spin mx-auto mb-4" />
+          <div className="w-9 h-9 rounded-full border-[3px] border-primary border-t-transparent animate-spin mx-auto mb-4" />
           <p className="text-gray-400 text-sm font-medium">Loading form…</p>
         </div>
       </div>
@@ -654,11 +672,11 @@ export function FormPage() {
   // ── Render: error ─────────────────────────────────────────────────────────────
   if (pageStatus === "error") {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 max-w-sm w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-5">
+      <div className="min-h-screen bg-[#fbfbfa] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl border border-gray-100 p-10 max-w-sm w-full text-center">
+          <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-5">
             <svg
-              className="w-8 h-8 text-red-400"
+              className="w-7 h-7 text-red-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -671,7 +689,7 @@ export function FormPage() {
               />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">
+          <h2 className="text-lg font-bold text-gray-900 mb-2">
             Form Unavailable
           </h2>
           <p className="text-sm text-gray-500 leading-relaxed">{errorMsg}</p>
@@ -689,11 +707,11 @@ export function FormPage() {
   // ── Render: success ───────────────────────────────────────────────────────────
   if (pageStatus === "submitted") {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 max-w-sm w-full text-center">
-          <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-5">
+      <div className="min-h-screen bg-[#fbfbfa] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl border border-gray-100 p-10 max-w-sm w-full text-center">
+          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
             <svg
-              className="w-10 h-10 text-green-500"
+              className="w-8 h-8 text-primary"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -706,14 +724,13 @@ export function FormPage() {
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Thank You!</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Thank you</h2>
           <p className="text-gray-500 text-sm leading-relaxed">
-            Your response has been submitted successfully. We'll be in touch
-            soon.
+            Your response has been submitted. We'll be in touch soon.
           </p>
           {form?.title && (
             <p className="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-100">
-              Submitted for: <span className="font-medium">{form.title}</span>
+              Submitted for: <span className="font-medium text-gray-600">{form.title}</span>
             </p>
           )}
           <div className="mt-4">
@@ -732,310 +749,238 @@ export function FormPage() {
   const hasRequiredFields = form.fields.some(
     (f) => f.required && f.type !== "heading",
   );
+  const pct = mobileProgressPct(form, answers);
 
   // ── Render: form ──────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-slate-50 py-10 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Top branding */}
-        <div className="flex items-center justify-center mb-6">
-          <img
-            src="/mobile logo.png"
-            alt="Anchor Africa"
-            className="h-12 object-contain"
-          />
-        </div>
+    <div className="min-h-screen bg-[#fbfbfa]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 lg:py-16">
+        <div className="lg:grid lg:grid-cols-[280px_1fr] lg:gap-16">
 
-        <form onSubmit={handleSubmit} noValidate>
-          {/* Form header strip */}
-          <div className="bg-primary rounded-t-2xl px-8 py-8">
-            <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-white/60 mb-2">
+          {/* Sticky left rail — desktop only */}
+          <ProgressRail form={form} answers={answers} pct={pct} />
+
+          {/* Mobile header (rail collapses to this) */}
+          <div className="lg:hidden mb-8">
+            <img src="/mobile logo.png" alt="Anchor Africa" className="h-9 object-contain mb-6" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#ba9d20]">
               {form.category}
             </span>
-            <h1 className="text-2xl font-bold text-white leading-tight">
+            <h1 className="text-2xl font-bold text-gray-900 leading-tight tracking-tight mt-2">
               {form.title}
             </h1>
             {form.description && (
-              <p className="text-white/75 text-sm mt-2.5 leading-relaxed">
+              <p className="text-sm text-gray-500 mt-2 leading-relaxed">
                 {form.description}
               </p>
             )}
+            {hasRequiredFields && (
+              <div className="mt-5">
+                <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-500"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1.5">{pct}% complete</p>
+              </div>
+            )}
           </div>
 
-          {/* Progress bar */}
-          {pageStatus === "active" && (
-            <ProgressBar fields={form.fields} answers={answers} />
-          )}
+          {/* Form column */}
+          <div>
+            <form onSubmit={handleSubmit} noValidate>
+              {/* Server-side errors */}
+              {serverErrors.length > 0 && (
+                <div className="rounded-lg bg-red-50 border border-red-100 px-5 py-4 space-y-1 mb-6">
+                  {serverErrors.map((err, i) => (
+                    <p
+                      key={i}
+                      className="text-sm text-red-600 flex items-start gap-2"
+                    >
+                      <span className="shrink-0 mt-px">•</span>
+                      {err}
+                    </p>
+                  ))}
+                </div>
+              )}
 
-          {/* Server-side errors */}
-          {serverErrors.length > 0 && (
-            <div className="bg-red-50 border-x border-red-100 px-6 py-4 space-y-1">
-              {serverErrors.map((err, i) => (
-                <p
-                  key={i}
-                  className="text-sm text-red-600 flex items-start gap-2"
-                >
-                  <span className="shrink-0 mt-px">•</span>
-                  {err}
-                </p>
-              ))}
-            </div>
-          )}
+              {/* Fields card */}
+              <div className="bg-white rounded-2xl border border-gray-100">
+                <div className="px-6 sm:px-10 py-2">
+                  {form.fields.map((field, idx) => {
+                    const isHeading = field.type === "heading";
+                    const hasErr = !!fieldErrors[field.id];
+                    const isLast = idx === form.fields.length - 1;
 
-          {/* Fields */}
-          <div className="border border-t-0 border-gray-100 shadow-sm rounded-b-2xl overflow-hidden bg-gray-100/60">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px">
-              {form.fields.map((field, idx) => {
-                const isHeading = field.type === "heading";
-                const hasErr = !!fieldErrors[field.id];
-                const span =
-                  isHeading || (field.colSpan ?? 2) >= 2
-                    ? "col-span-1 sm:col-span-2"
-                    : "col-span-1";
+                    return (
+                      <div
+                        key={field.id ?? idx}
+                        className={`py-6 ${!isLast ? "border-b border-gray-100" : ""}`}
+                        data-has-error={hasErr || undefined}
+                      >
+                        {isHeading ? (
+                          <FieldInput
+                            field={field}
+                            value={null}
+                            error={undefined}
+                            onChange={handleChange}
+                          />
+                        ) : (
+                          <>
+                            <label className="block text-sm font-semibold text-gray-800 mb-1 leading-snug">
+                              {field.question}
+                              {field.required && (
+                                <span className="text-[#ba9d20] ml-1">*</span>
+                              )}
+                            </label>
+                            {field.helpText && (
+                              <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+                                {field.helpText}
+                              </p>
+                            )}
+                            <div className="max-w-md">
+                              <FieldInput
+                                field={field}
+                                value={
+                                  answers[field.id] ??
+                                  (field.type === "checkboxes" ? [] : "")
+                                }
+                                error={fieldErrors[field.id]}
+                                onChange={handleChange}
+                              />
+                            </div>
+                            {hasErr && (
+                              <p className="mt-2 text-xs text-red-500 flex items-center gap-1 font-medium">
+                                <svg
+                                  className="w-3.5 h-3.5 shrink-0"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                {fieldErrors[field.id]}
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
 
-                return (
-                  <div
-                    key={field.id ?? idx}
-                    className={`bg-white ${span} ${isHeading ? "px-8 py-5" : "px-6 py-5"}`}
-                    data-has-error={hasErr || undefined}
+                {/* Submit section */}
+                <div className="px-6 sm:px-10 py-6 bg-gray-50/60 rounded-b-2xl border-t border-gray-100">
+                  {hasRequiredFields && (
+                    <p className="text-xs text-gray-400 mb-4">
+                      Fields marked <span className="text-[#ba9d20] font-semibold">*</span> are required
+                    </p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={pageStatus === "submitting"}
+                    className="w-full sm:w-auto px-8 py-3 rounded-lg bg-primary hover:bg-primary-hover text-white font-semibold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {isHeading ? (
-                      <FieldInput
-                        field={field}
-                        value={null}
-                        error={undefined}
-                        onChange={handleChange}
-                      />
+                    {pageStatus === "submitting" ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                        Submitting…
+                      </>
                     ) : (
                       <>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1 leading-snug">
-                          {field.question}
-                          {field.required && (
-                            <span className="text-red-500 ml-1">*</span>
-                          )}
-                        </label>
-                        {field.helpText && (
-                          <p className="text-xs text-gray-400 mb-3 leading-relaxed">
-                            {field.helpText}
-                          </p>
-                        )}
-                        <FieldInput
-                          field={field}
-                          value={
-                            answers[field.id] ??
-                            (field.type === "checkboxes" ? [] : "")
-                          }
-                          error={fieldErrors[field.id]}
-                          onChange={handleChange}
-                        />
-                        {hasErr && (
-                          <p className="mt-2 text-xs text-red-500 flex items-center gap-1 font-medium">
-                            <svg
-                              className="w-3.5 h-3.5 shrink-0"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                            {fieldErrors[field.id]}
-                          </p>
-                        )}
+                        Submit Response
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M14 5l7 7m0 0l-7 7m7-7H3"
+                          />
+                        </svg>
                       </>
                     )}
-                  </div>
-                );
-              })}
-            </div>
-            {/* Submit section */}
-            <div className="px-8 py-7 bg-white border-t border-gray-100">
-              {hasRequiredFields && (
-                <p className="text-xs text-gray-400 mb-4">
-                  Fields marked{" "}
-                  <span className="text-red-500 font-semibold">*</span> are
-                  required
-                </p>
-              )}
-              <button
-                type="submit"
-                disabled={pageStatus === "submitting"}
-                className="w-full py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm"
-              >
-                {pageStatus === "submitting" ? (
-                  <>
-                    <div className="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                    Submitting…
-                  </>
-                ) : (
-                  <>
-                    Submit Response
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M14 5l7 7m0 0l-7 7m7-7H3"
-                      />
-                    </svg>
-                  </>
-                )}
-              </button>
-            </div>
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
 
         {/* Footer */}
-        <footer
-          className="mt-10 rounded-2xl overflow-hidden"
-          style={{ background: "#1a3345" }}
-        >
-          {/* Contact bar */}
-          <div className="border-b border-white/10 px-6 py-7">
-            <h3 className="text-base font-semibold text-white mb-5">
+        <footer className="mt-16 rounded-2xl overflow-hidden" style={{ background: "#1a3345" }}>
+          <div className="border-b border-white/10 px-6 sm:px-10 py-8">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-white/60 mb-6">
               Get in Touch
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Phone */}
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-primary/20 mt-0.5">
-                  <svg
-                    className="w-4 h-4 text-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs text-white/50 mb-1">Call Us</p>
-                  <a
-                    href="tel:+231775608020"
-                    className="text-sm text-white/80 hover:text-primary block transition-colors"
-                  >
-                    +231-775-608020
-                  </a>
-                  <a
-                    href="tel:+231881608020"
-                    className="text-sm text-white/80 hover:text-primary block transition-colors"
-                  >
-                    +231-881-608020
-                  </a>
-                </div>
+              <div>
+                <p className="text-xs text-white/40 mb-2">Call Us</p>
+                <a
+                  href="tel:+231775608020"
+                  className="text-sm text-white/85 hover:text-[#ba9d20] block transition-colors"
+                >
+                  +231-775-608020
+                </a>
+                <a
+                  href="tel:+231881608020"
+                  className="text-sm text-white/85 hover:text-[#ba9d20] block transition-colors"
+                >
+                  +231-881-608020
+                </a>
               </div>
               {/* Email */}
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-primary/20 mt-0.5">
-                  <svg
-                    className="w-4 h-4 text-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs text-white/50 mb-1">Email</p>
-                  <a
-                    href="mailto:info@anchorafrica.org"
-                    className="text-sm text-white/80 hover:text-primary transition-colors"
-                  >
-                    info@anchorafrica.org
-                  </a>
-                </div>
+              <div>
+                <p className="text-xs text-white/40 mb-2">Email</p>
+                <a
+                  href="mailto:info@anchorafrica.org"
+                  className="text-sm text-white/85 hover:text-[#ba9d20] transition-colors"
+                >
+                  info@anchorafrica.org
+                </a>
               </div>
               {/* Address */}
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-primary/20 mt-0.5">
-                  <svg
-                    className="w-4 h-4 text-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs text-white/50 mb-1">Address</p>
-                  <p className="text-sm text-white/80 leading-snug">
-                    Swankamore, SKD Blvd.,
-                    <br />
-                    Paynesville, Liberia
-                  </p>
-                </div>
+              <div>
+                <p className="text-xs text-white/40 mb-2">Address</p>
+                <p className="text-sm text-white/85 leading-snug">
+                  Swankamore, SKD Blvd.,
+                  <br />
+                  Paynesville, Liberia
+                </p>
               </div>
               {/* Hours */}
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 shrink-0 flex items-center justify-center rounded-full bg-primary/20 mt-0.5">
-                  <svg
-                    className="w-4 h-4 text-primary"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xs text-white/50 mb-1">Hours</p>
-                  <p className="text-sm text-white/80 leading-snug">
-                    Mon–Thu: 8:00am–5:00pm
-                    <br />
-                    Fri: 8:00am–1:00pm
-                  </p>
-                </div>
+              <div>
+                <p className="text-xs text-white/40 mb-2">Hours</p>
+                <p className="text-sm text-white/85 leading-snug">
+                  Mon–Thu: 8:00am–5:00pm
+                  <br />
+                  Fri: 8:00am–1:00pm
+                </p>
               </div>
             </div>
           </div>
 
           {/* Copyright bar */}
           <div
-            className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3"
-            style={{ background: "#273338" }}
+            className="px-6 sm:px-10 py-4 flex flex-col sm:flex-row items-center justify-between gap-3"
+            style={{ background: "#15262f" }}
           >
-            <p className="text-xs text-white/50 text-center sm:text-left">
+            <p className="text-xs text-white/40 text-center sm:text-left">
               &copy; {new Date().getFullYear()}{" "}
               <a
                 href="https://anchorafrica.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white font-medium hover:text-primary transition-colors"
+                className="text-white/70 font-medium hover:text-[#ba9d20] transition-colors"
               >
                 ANCHOR Africa
               </a>{" "}
@@ -1046,7 +991,7 @@ export function FormPage() {
                 href="https://anchorafrica.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-white/50 hover:text-primary transition-colors"
+                className="text-xs text-white/40 hover:text-[#ba9d20] transition-colors"
               >
                 Privacy Policy
               </a>
@@ -1054,7 +999,7 @@ export function FormPage() {
                 href="https://anchorafrica.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-white/50 hover:text-primary transition-colors"
+                className="text-xs text-white/40 hover:text-[#ba9d20] transition-colors"
               >
                 Terms &amp; Conditions
               </a>
