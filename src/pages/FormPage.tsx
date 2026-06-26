@@ -406,7 +406,7 @@ function FieldInput({ field, value, error, onChange }: FieldInputProps) {
 
 function ProgressRail({
   form,
-  answers,
+  answers: _answers,
   pct,
 }: {
   form: PublicForm;
